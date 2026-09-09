@@ -140,3 +140,8 @@ User requested reuse of Google Drive connected to ChatGPT/Claude instead of sepa
 User book task fetched about 1 MB then hit the 80 KB review cap. Added bounded body section audits (up to sixteen 100 KB sections), preserved original evidence and coverage, and final reviewer synthesis of findings. No truncation of stored evidence, no claim of lossless summary/full-source Astra verification. Failed/unapproved/cancelled runs no longer show projections or savings; actual spend remains. Pages 237ae9f1, Worker unchanged. Both idle helpers updated preserving pairing; owner PID 48437. 32 harness, 43 connector and nine cost tests pass; deployed browser failure-state test and canonical helper hashes pass.
 
 Reused exact failed book trace/draft, without another Drive fetch. All 13 sections reviewed; Astra rejected draft due unresolved source truncation/pagination, absent citations and substantive omissions. needs_human_review is accurate; no accepted book artifact produced. Logs /tmp/acenet-book-section-review. Full-folder/full-book coverage remains an open capability limit, not resolved by this size-limit fix.
+
+
+## [2026-09-09] session | Private GitHub repository created
+
+Published the standalone project to https://github.com/hamzadianathbiz/acenet (private, main). Includes source, setup/check scripts, validation, synthetic evaluation pack, decisions, dated history and unresolved proposals. Fresh preparation and all 114 selected tests pass. Credentials, account state, raw document/task runs and migration backups excluded; committed contents checked against local secrets. Dependency advisory chain recorded in REPOSITORY-VALIDATION.md. No automatic deployment or workspace synchronization enabled.
