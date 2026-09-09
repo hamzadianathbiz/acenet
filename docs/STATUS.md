@@ -2,9 +2,9 @@
 
 Live site: https://ace-acenet.pages.dev
 Public source: https://github.com/hamzadianathbiz/acenet
-Pages release: ae02e441. Worker: 7ab077ce-36f1-40b7-bc50-b82f6679285a.
+Pages release: c928cf29. Worker: 346d6e72-6c00-4970-adbf-4ab756a7f696.
 
-The missing-executor amber dead end is replaced by a direct connection dialog: sign in separately, retain the draft/files/chat, and resume once. Cancel/New chat prevents sending. Canonical browser fixture tests and the authenticated no-queue setup response pass. Real OpenRouter sign-in and inference still require the user connection.
+The popup flow is replaced by same-tab **Connect & send**. A private bounded draft restores prompt/files/chat after OAuth; success sends once, while Back/decline/expiry restores without sending. No executor modal or callback account-panel opening. 45 Node tests and browser integration with actual route code pass locally and on deployed assets. The real OpenRouter sign-in page opens; completing user authorization and inference remain pending.
 
 ## Current workflow
 One chat composer, accepted replies and follow-up context. Work details and cost are collapsed. New chat starts a separate conversation; cross-chat memory is deferred.

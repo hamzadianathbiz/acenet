@@ -159,3 +159,9 @@ Pages c904228f and Worker 28023340-1de1-4991-8fb3-75b839782017 deployed. 121 aut
 Replaced the amber missing-executor error with a direct Connect free models dialog. OAuth opens separately, keeps the pending message and attachments in the original chat, and resumes once after connection. Model selection remains automatic. Cancellation and New chat do not send; blocked popups get an explicit sign-in link. Renamed the app's global open function so native popup creation works.
 
 Worker 7ab077ce-36f1-40b7-bc50-b82f6679285a and Pages ae02e441 live. 42 Node tests, local/canonical browser fixtures and canonical asset hashes pass. Authenticated missing-setup probe creates no run or model spend. Actual third-party login/inference not performed.
+
+## [2026-09-09] fix | Replace setup popups with same-tab sign-in
+
+User screenshots showed the popup and account panel still producing overlapping setup surfaces. Removed the executor dialog and separate-window OAuth. The composer now offers Connect & send, saves a bounded private tenant draft, navigates to OpenRouter in the same tab, restores prompt/files/chat and sends once on successful authorization. Back/decline/expiry preserve the draft without sending. Settings-only connections return without sending. Only a flow ID stays in tab storage; source content is excluded from OAuth URLs.
+
+Pages c928cf29 and Worker 346d6e72-6c00-4970-adbf-4ab756a7f696 live. 45 Node tests and actual-route browser integration pass on local/canonical assets. Real OpenRouter authorization page opens. Asset hashes and authenticated nonmatching-flow restore verified; no user login or inference performed.

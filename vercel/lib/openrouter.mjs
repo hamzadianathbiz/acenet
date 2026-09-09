@@ -1,5 +1,5 @@
 import {createHash,createCipheriv,createDecipheriv,randomBytes} from 'node:crypto';
-import {assert} from './core.mjs';
+import {assert,normalizeInput} from './core.mjs';
 const json=v=>Response.json(v,{headers:{'Cache-Control':'no-store'}});
 const hash=v=>createHash('sha256').update(v).digest();
 function encryptionKey(){assert('Account encryption unavailable.',!!process.env.STORAGE_KEY);return hash('acenet-openrouter-v1:'+process.env.STORAGE_KEY);}
@@ -13,8 +13,41 @@ export async function openrouterStatus(storage){return {connected:!!await storag
 export async function openrouterRoute(request,storage){const url=new URL(request.url),p=url.pathname;if(!p.startsWith('/api/account/openrouter/'))return null;const method=request.method;
  if(p.endsWith('/models')&&method==='GET')return json({models:await catalog()});
  if(method!=='POST')return null;
- if(p.endsWith('/start')){const verifier=randomBytes(32).toString('base64url'),state=randomBytes(24).toString('hex');await storage.put('openrouter-pkce',{verifier,state,expires:Date.now()+600000});const callback=new URL('/',url.origin);callback.searchParams.set('or_state',state);const auth=new URL('https://openrouter.ai/auth');auth.searchParams.set('callback_url',callback.href);auth.searchParams.set('code_challenge',hash(verifier).toString('base64url'));auth.searchParams.set('code_challenge_method','S256');return json({url:auth.href});}
- if(p.endsWith('/finish')){const d=await request.json(),pending=await storage.get('openrouter-pkce');assert('OpenRouter connection expired. Start again.',pending&&pending.expires>Date.now()&&typeof d.state==='string'&&d.state===pending.state&&typeof d.code==='string'&&d.code.length>0&&d.code.length<2000);await storage.put('openrouter-pkce',null);const result=await remote('auth/keys',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:d.code,code_verifier:pending.verifier,code_challenge_method:'S256'})});assert('OpenRouter returned no valid key.',typeof result.key==='string'&&result.key.startsWith('sk-or-')&&result.key.length<1024);await storage.put('openrouter-key',seal(result.key,storage.tenant));return json({connected:true});}
+ if(p.endsWith('/start')){
+  const d=await request.json();let draft=null;
+  if(d.draft){
+   const v=d.draft;assert('Invalid chat draft.',typeof v.task==='string'&&v.task.length<=80000&&typeof v.drive_query==='string'&&v.drive_query.length<=4000&&['auto','chatgpt','claude'].includes(v.provider)&&['chatgpt','claude'].includes(v.drive_provider)&&typeof v.resume==='boolean');
+   const {source}=normalizeInput({brief:v.task||'Draft',context:v.context});
+   if(v.parent_id)assert('Conversation not found.',typeof v.parent_id==='string'&&/^[a-zA-Z0-9-]+$/.test(v.parent_id)&&!!await storage.get('run:'+v.parent_id));
+   draft={task:v.task,context:source.context,parent_id:v.parent_id||null,provider:v.provider,drive_query:v.drive_query,drive_provider:v.drive_provider,resume:v.resume&&!!v.task.trim()};
+  }
+  const verifier=randomBytes(32).toString('base64url'),state=randomBytes(24).toString('hex');
+  await storage.put('openrouter-pkce',{verifier,state,expires:Date.now()+600000,draft_expires:Date.now()+86400000,draft});
+  const callback=new URL('/',url.origin);callback.searchParams.set('or_state',state);
+  const auth=new URL('https://openrouter.ai/auth');auth.searchParams.set('callback_url',callback.href);auth.searchParams.set('code_challenge',hash(verifier).toString('base64url'));auth.searchParams.set('code_challenge_method','S256');
+  return json({url:auth.href,state});
+ }
+ if(p.endsWith('/restore')){
+  const d=await request.json(),pending=await storage.get('openrouter-pkce');
+  if(!pending||typeof d.state!=='string'||d.state!==pending.state)return json({draft:null});
+  const draft=pending.draft_expires>Date.now()?pending.draft:null;
+  // Claim auto-resume once, but retain the bounded draft for retry after a lost response.
+  // A cancelled sign-in or repeat restore cannot automatically send this message.
+  await storage.put('openrouter-pkce',{...pending,resume_claimed:true,...(!draft?{draft:null}:{})});
+  return json({draft,connected:pending.connected===true,auto_resume:pending.connected===true&&!pending.resume_claimed});
+ }
+ if(p.endsWith('/finish')){
+  const d=await request.json(),pending=await storage.get('openrouter-pkce');
+  assert('OpenRouter connection expired. Please try again.',pending&&pending.expires>Date.now()&&!pending.consumed&&typeof d.state==='string'&&d.state===pending.state&&typeof d.code==='string'&&d.code.length>0&&d.code.length<2000);
+  await storage.put('openrouter-pkce',{...pending,consumed:true});
+  const result=await remote('auth/keys',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:d.code,code_verifier:pending.verifier,code_challenge_method:'S256'})});
+  assert('OpenRouter returned no valid key.',typeof result.key==='string'&&result.key.startsWith('sk-or-')&&result.key.length<1024);
+  await storage.put('openrouter-key',seal(result.key,storage.tenant));
+  // Preserve a restore that happened while the provider exchange was in flight.
+  const latest=await storage.get('openrouter-pkce');
+  if(latest?.state===pending.state)await storage.put('openrouter-pkce',{...latest,connected:true});
+  return json({connected:true});
+ }
  if(p.endsWith('/disconnect')){await storage.put('openrouter-key',null);await storage.put('openrouter-pkce',null);const selection=await storage.get('local-model');if(selection?.server==='openrouter')await storage.put('local-model',null);return json({connected:false});}
  if(p.endsWith('/select')){const d=await request.json();assert('Connect OpenRouter first.',!!await storage.get('openrouter-key'));assert('Select an available free model.',(await catalog()).some(m=>m.id===d.model));await storage.put('local-model',{server:'openrouter',model:d.model});return json({ok:true});}
  return null;
