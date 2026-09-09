@@ -3,7 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from openrouter_inference import openrouter_call,free_model
-MODEL={'id':'test/body:free','pricing':{'prompt':'0','completion':'0'},'context_length':32768,'supported_parameters':['structured_outputs']}
+MODEL={'hugging_face_id':'test/body','id':'test/body:free','pricing':{'prompt':'0','completion':'0'},'context_length':32768,'supported_parameters':['structured_outputs']}
 class OpenRouterTests(unittest.TestCase):
  def test_free_means_all_prices_known_zero(self):
   self.assertTrue(free_model(MODEL))

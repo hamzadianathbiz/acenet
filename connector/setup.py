@@ -63,7 +63,7 @@ def start_runner(root,autostart=True):
  log=(root/'runner.log').open('a')
  subprocess.Popen([py,bridge,'--config',config],env=env,stdout=log,stderr=log,start_new_session=sys.platform!='win32',**({'creationflags':0x08000000|0x00000008} if sys.platform=='win32' else {}));log.close()
 
-RUNTIME_FILES=('bridge.py','harness.py','economy.py','permissions.py','model-instructions.md','local_models.py','local_inference.py','openrouter_inference.py')
+RUNTIME_FILES=('orchestrator.py','bridge.py','harness.py','economy.py','permissions.py','model-instructions.md','local_models.py','local_inference.py','openrouter_inference.py')
 
 def install_runtime(source_dir,root):
  # Validate the complete release before replacing any installed file.

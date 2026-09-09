@@ -21,7 +21,7 @@ def free_model(row):
  def zero(v):
   try:return v is not None and v!='' and not isinstance(v,bool) and float(v)==0
   except (ValueError,TypeError):return False
- return isinstance(row.get('id'),str) and row['id'].endswith(':free') and all(k in pricing for k in ('prompt','completion')) and all(zero(v) for v in pricing.values())
+ return isinstance(row.get('hugging_face_id'),str) and '/' in row['hugging_face_id'] and isinstance(row.get('id'),str) and row['id'].endswith(':free') and all(k in pricing for k in ('prompt','completion')) and all(zero(v) for v in pricing.values())
 
 def openrouter_call(config,prompt,schema,directory,credential):
  model=config['model']

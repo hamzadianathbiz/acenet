@@ -280,6 +280,9 @@ class Harness:
             save(self.root / 'ledger.json', self.ledger)
 
     def run(self, brief, context=None, baseline=False):
+        if self.config.get('execution_policy') == 'astra-orchestrator-v3' and not baseline:
+            from orchestrator import run
+            return run(self, brief, context)
         if self.config.get('execution_policy') == 'adaptive-v2' and not baseline:
             from economy import run
             return run(self, brief, context)

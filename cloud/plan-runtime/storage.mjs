@@ -11,7 +11,7 @@ export class Storage{
   const path=this.checked(key,value);
   if(!key.startsWith('run:')){await this.raw.put(path,value);return;}
   await this.raw.transaction(async tx=>{
-   const old=await tx.get(this.path('index'))||[],summary={id:value.id,title:value.title,created:value.created,mode:value.mode,report:value.report};
+   const old=await tx.get(this.path('index'))||[],summary={id:value.id,conversation_id:value.conversation_id,chat_title:value.chat_title,title:value.title,created:value.created,mode:value.mode,report:value.report};
    const index=[summary,...old.filter(row=>row.id!==value.id)].slice(0,100);const indexPath=this.checked('index',index);
    await tx.put(path,value);await tx.put(indexPath,index);
   });

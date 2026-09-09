@@ -12,7 +12,7 @@ const account=s=>planRoute(request('/api/account'),s).then(r=>r.json());
 const post=(s,path,data={})=>planRoute(request(path,data),s).then(r=>r.json());
 const bridge=(s,path,data={})=>bridgeRoute(request('/api/bridge/'+path,data),s).then(r=>r.json());
 const inventory=(models=['qwen3:4b'])=>({servers:[{id:'ollama',online:true,models:models.map(id=>({id,name:id,size_bytes:2500000000}))},{id:'lmstudio',online:true,models:[{id:'qwen3-8b-local',name:'Qwen 3 8B'}]}]});
-const heartbeat=(s,models=inventory(),extra={})=>bridge(s,'next',{connector_id:'test-helper',signed_in:true,harness_version:2,local_models:models,...extra});
+const heartbeat=(s,models=inventory(),extra={})=>bridge(s,'next',{connector_id:'test-helper',signed_in:true,harness_version:3,local_models:models,...extra});
 const pull=(s,model='qwen3:4b')=>post(s,'/api/account/local-model/pull',{model});
 
 test('discovery drops remote endpoints, cloud models, embeddings, duplicate and malformed metadata',()=>{
@@ -52,8 +52,7 @@ test('a missing selected model blocks execution until explicitly cleared without
  await assert.rejects(()=>post(s,'/api/runs',{brief:'A task'}),/selected local model is unavailable/);
  assert.equal(await s.get('active'),undefined);
  await post(s,'/api/account/local-model/clear');
- const {id}=await post(s,'/api/runs',{brief:'A task'});
- assert.equal((await s.get('run:'+id)).config.body.model,'gpt-5.6-luna');
+ await assert.rejects(()=>post(s,'/api/runs',{brief:'A task'}),/open-model executor/);
 });
 
 test('downloads require a live helper, online Ollama, an allowlisted model and no active task',async()=>{
@@ -61,7 +60,7 @@ test('downloads require a live helper, online Ollama, an allowlisted model and n
  await heartbeat(s,{servers:[]});await assert.rejects(()=>pull(s),/Open Ollama/);
  await heartbeat(s);await assert.rejects(()=>pull(s,'qwen3:480b-cloud'),/supported model downloads/);
  await assert.rejects(()=>pull(s,'qwen3:4b; rm -rf /'),/supported model downloads/);
- await post(s,'/api/runs',{brief:'A task'});await assert.rejects(()=>pull(s),/task is already running/);
+ await post(s,'/api/account/local-model',{server:'ollama',model:'qwen3:4b'});await post(s,'/api/runs',{brief:'A task'});await assert.rejects(()=>pull(s),/task is already running/);
 });
 
 test('downloads are claimed once, block tasks and auto-select only a verified completed model',async()=>{
@@ -137,7 +136,8 @@ test('tenant stores keep inventories, selections and action claims separate',asy
  await pull(alice);const {action}=await heartbeat(alice);
  assert.equal((await account(bob)).local_action,null);
  await assert.rejects(()=>bridge(bob,'local-progress',{id:action.id,claim:action.claim,status:'completed',local_models:inventory()}),/Invalid model download claim/);
+ await post(bob,'/api/account/local-model',{server:'ollama',model:'qwen3:8b'});
  const bobTask=await post(bob,'/api/runs',{brief:'Independent task'});
- assert.equal((await bob.get('run:'+bobTask.id)).config.body.model,'gpt-5.6-luna');
+ assert.equal((await bob.get('run:'+bobTask.id)).config.body.model,'qwen3:8b');
  assert.equal(await alice.get('run:'+bobTask.id),undefined);
 });

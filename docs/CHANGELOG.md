@@ -145,3 +145,11 @@ Reused exact failed book trace/draft, without another Drive fetch. All 13 sectio
 ## [2026-09-09] session | Private GitHub repository created
 
 Published the standalone project to https://github.com/hamzadianathbiz/acenet (private, main). Includes source, setup/check scripts, validation, synthetic evaluation pack, decisions, dated history and unresolved proposals. Fresh preparation and all 114 selected tests pass. Credentials, account state, raw document/task runs and migration backups excluded; committed contents checked against local secrets. Dependency advisory chain recorded in REPOSITORY-VALIDATION.md. No automatic deployment or workspace synchronization enabled.
+
+## [2026-09-09] session | Astra orchestration and simple chat deployed
+
+Replaced draft-first routing with Astra plan, open-model execution and Astra review, with one bounded open-model repair. Native model fallback is disabled for deliverables. Missing executor setup fails before spending; connected OpenRouter can auto-select an eligible free model. Version 3 is included in both helper packages and installed helpers.
+
+The main UI now shows a conversation and composer. Follow-ups carry same-tenant chat messages, accepted answers and attachments; New chat starts fresh. Details and costs are collapsed. Cross-conversation memory is deferred.
+
+Pages c904228f and Worker 28023340-1de1-4991-8fb3-75b839782017 deployed. 121 automated checks and canonical browser fixtures pass; deployed asset hashes match. Actual open-model inference and v3 savings remain unverified pending executor connection.

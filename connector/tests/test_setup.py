@@ -16,7 +16,7 @@ class Tests(unittest.TestCase):
    (installed/'config.json').write_text('private pairing remains')
    installer.install_runtime(bundle,installed)
    self.assertEqual((installed/'config.json').read_text(),'private pairing remains')
-   subprocess.run([sys.executable,'-c','import bridge,economy,permissions,openrouter_inference; from pathlib import Path; assert Path("model-instructions.md").is_file()'],cwd=installed,check=True)
+   subprocess.run([sys.executable,'-c','import bridge,economy,orchestrator,permissions,openrouter_inference; from pathlib import Path; assert Path("model-instructions.md").is_file()'],cwd=installed,check=True)
  def test_incomplete_bundle_does_not_replace_installation(self):
   with tempfile.TemporaryDirectory() as d:
    d=Path(d);source=d/'source';root=d/'installed';source.mkdir();root.mkdir()

@@ -1,6 +1,6 @@
 # ACENET
 
-Private source repository and project handoff. **Start with [current status](docs/STATUS.md), [project history](docs/CHANGELOG.md), and [validation](VALIDATION.md).**
+Public source repository and project handoff. **Start with [current status](docs/STATUS.md), [project history](docs/CHANGELOG.md), and [validation](VALIDATION.md).**
 
 ## Fresh checkout
 
@@ -15,9 +15,13 @@ Production app: **https://ace-acenet.pages.dev**
 
 **Hosting, 7 September 2026:** live on Cloudflare Pages with private SQLite Durable Object storage. Hamza approved a fresh workspace because Vercel cannot export its quota-suspended store. The old 40 records remain untouched for later recovery. Existing invited users must create a new ACENET account and pair the updated helper. The owner password still works and the owner helper has been moved. No paid hosting upgrade was activated. Free-tier limits still apply; see `cloud/README.md`.
 
-**Live update, 8 September:** Pages `237ae9f1`, Worker `58ee3ca1-b812-4715-a240-92381e46d466`. Document uploads, adaptive execution, connector evidence/approvals and measured baseline comparison are deployed. Owner helper is updated and online with version 2; other users must rerun setup once.
+**Live update, 9 September:** Pages `c904228f`, Worker `28023340-1de1-4991-8fb3-75b839782017`. The main surface is a chat with same-conversation history; work details and cost are collapsed. Separate chats do not share memory.
 
-Write a task in the ACE chat-style composer. The new adaptive policy sends small self-contained requests directly to Astra. Other tasks use a body model to draft, followed by one Astra check with exact corrections. It removes the upfront planning call and repeated repair loop. Failed checks remain visible; they do not silently trigger further expensive calls.
+Every normal turn follows Astra plan → open-model execution → Astra review, with at most one repair performed by the open model. Astra defines one to three ordered steps and acceptance criteria. No draft-first policy, direct-Astra shortcut or native executor fallback is used for new normal tasks. Explicit measured baselines still use Astra alone.
+
+Connect ChatGPT for Astra and OpenRouter for a hosted executor, or select an available local model. OpenRouter automatically chooses an available zero-priced model with a published Hugging Face model reference when no selection exists. Public weights are not a blanket OSI license guarantee. Native account readers can retrieve connected sources under Astra's plan: ChatGPT uses Astra for retrieval; Claude uses a narrowly scoped Haiku source-reader. Deliverables, assembly and repairs remain with the open executor.
+
+The pipeline and chat tests pass, but real OpenRouter inference remains unverified until an account is connected. The accessible owner workspace currently has no OpenRouter connection or local executor; missing setup stops before queueing/model spend. The installed helpers are version 3.
 
 ## Start: your own account and subscription
 
@@ -25,7 +29,7 @@ Write a task in the ACE chat-style composer. The new adaptive policy sends small
 2. In Account settings, choose ChatGPT or Claude and click **Set up on this computer**.
 3. Click **Copy setup command**, paste it into Terminal (Mac) or PowerShell (Windows preview), and press Enter. Setup automatically fetches and verifies the helper, installs any missing runtime/provider app, and passes your temporary code and provider choice. Complete the official provider sign-in; no manual ZIP download or separate code entry is needed. This still installs local software and requires an awake computer. The downloadable helper remains an optional fallback. ACENET never asks for a provider password or OAuth token.
 4. The app detects the connected runner automatically. The helper starts the runner now and at login; keep the computer awake while tasks run. The browser and setup window can close. Mac startup configuration is tested via an isolated fixture; Windows setup remains preview pending a real Windows-device test.
-5. Automatic routing prefers connected ChatGPT: Astra checks and Luna drafts under the adaptive policy. A Claude-only connection uses native Opus/Haiku aliases; completed calls show the exact models reported by Claude Code. You can explicitly choose a connected provider or a local Ollama/LM Studio body in settings.
+5. ChatGPT is required for Astra planning/review. Connect OpenRouter once for automatic free-model execution or choose an installed Ollama/LM Studio model. The source-provider selector chooses which native account retrieves connected data; it does not replace Astra.
 
 **Provider status:** ChatGPT has a live verified plan-backed run. Claude is preview: native subscription detection and one live structured-output Haiku call pass; the full Opus/Haiku workflow has not yet been tested live. Gemini and other subscriptions are not implemented; the UI does not pretend they are connected. Subscription entitlements differ by account, and unavailable models fail visibly.
 
@@ -75,11 +79,11 @@ The composer extracts searchable PDF, DOCX, XLSX, PPTX and text/code files in th
 
 ## Quality and cost
 
-The target remains Astra-like quality at one-tenth the cost. Neither universal quality parity nor that cost target is demonstrated. In the new paired coding benchmark, mixed execution cost **$0.1339596 API equivalent**, versus **$0.21187** for an independent Astra-only run: **$0.0779104 saved, about 37%**. Both passed the same five independent acceptance checks. This is one task, not a general quality or savings guarantee. The earlier policy had cost more than Astra alone; historical evidence remains in `harness/VALIDATION.md`.
+The target remains Astra-like quality at one-tenth the cost; the v3 policy has no live economic benchmark yet. Neither universal quality parity nor that cost target is demonstrated. In the new paired coding benchmark, mixed execution cost **$0.1339596 API equivalent**, versus **$0.21187** for an independent Astra-only run: **$0.0779104 saved, about 37%**. Both passed the same five independent acceptance checks. This is one task, not a general quality or savings guarantee. The earlier policy had cost more than Astra alone; historical evidence remains in `harness/VALIDATION.md`.
 
-The adaptive policy uses one direct Astra call for small self-contained tasks, or a cheap draft plus one Astra check. An open-model body needing account data adds a native research call. Original source is preserved; an oversized prompt is rejected, never silently truncated. A failed check stops without an automatic repair loop. Model review does not replace executed tests or human checks.
+New tasks use Astra planning, open-model execution and Astra review. Tasks needing connected data add a native source-read call directed by the plan. Original source is preserved; an oversized prompt is rejected, never silently truncated. A failed check gets at most one open-model repair and one additional Astra review, then stops if unresolved. Model review does not replace executed tests or human checks.
 
-Large retrieved evidence now uses section audits instead of failing at the former 80 KB review limit. Up to 16 sections of 100 KB are checked by the body against the complete candidate; Astra receives all section findings for its final decision. Original source is preserved locally, and section coverage is recorded. This adds bounded calls and cost. Astra reviews derived findings, not every original source byte independently; quality parity remains unproven. Larger datasets still require splitting. This is not yet a resumable folder-ingestion system.
+Large retrieved evidence now uses section audits instead of failing at the former 80 KB review limit. The new orchestrator extracts up to 48 sections of 24 KB through the open executor before drafting; Astra receives the derived findings for its final decision. Original source is preserved locally, and section coverage is recorded. This adds bounded calls and cost. Astra reviews derived findings, not every original source byte independently; quality parity remains unproven. Larger datasets still require splitting. This is not yet a resumable folder-ingestion system.
 
 Failed, cancelled and unapproved tasks show recorded model spend but no traditional projection or dollar savings. A candidate is not a completed deliverable.
 
@@ -108,3 +112,9 @@ Account recovery, per-connector credential rotation, account deletion/export and
 ## Verification
 
 See `VALIDATION.md` for current results and limitations.
+
+## Chat context
+
+Follow-up turns preserve previous user messages, accepted answers/artifacts and attachments from the same workspace/chat. New chat starts without that history. A private parent-run lookup binds continuation to the authenticated tenant; supplied conversation history is not trusted. Existing task/source size limits still apply; long conversations fail explicitly rather than silently discard earlier context. Unapproved drafts are not inserted as accepted assistant answers. Connected-source raw caches and cross-chat memory are not implemented.
+
+Minimal chat interaction was informed by Pi's documented harness approach: https://github.com/earendil-works/pi/tree/main/packages/coding-agent. This app does not embed Pi or use it to proxy subscription tokens.

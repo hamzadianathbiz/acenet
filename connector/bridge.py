@@ -193,7 +193,7 @@ def snapshot(root):
    plan=read(root/'blueprint.json',{});steps=plan.get('steps',[])
    if execution<len(steps):entry['task']=steps[execution]['instructions'];entry['step_id']=steps[execution]['id']
    execution+=1
-  else:entry['task']={'plan':'Create the blueprint and acceptance criteria','review':'Check the result against every requirement','assemble':'Assemble the result and apply review feedback','baseline':'Complete the original task directly','draft':'Produce the complete draft','judge':'Astra checks every requirement and corrects the draft','research':'Retrieve required connected-account sources','evidence':'Check a source section against the draft'}.get(entry['role'],entry['role'])
+  else:entry['task']={'plan':'Create the blueprint and acceptance criteria','review':'Check the result against every requirement','assemble':'Assemble the result and apply review feedback','baseline':'Complete the original task directly','draft':'Produce the complete draft','judge':'Astra checks every requirement and corrects the draft','research':'Retrieve sources under Astra’s plan','source_extract':'Open model extracts a source section','evidence':'Check a source section against the draft'}.get(entry['role'],entry['role'])
  manifest=read(root/'evidence-manifest.json')
  if manifest:report={**report,'evidence_review':manifest}
  permissions=[read(p,{}) for p in (root/'permissions').glob('*.request.json')]
@@ -269,7 +269,7 @@ def main():
   try:
    from local_models import discover_models
    providers={'chatgpt':chatgpt_login(),'claude':claude_login()}
-   reply=request('/api/bridge/next',{'connector_id':identity,'signed_in':any(providers.values()),'harness_version':2,'openrouter_capable':True,'providers':providers,'connector_access':{'version':1,'chatgpt':providers['chatgpt'],'claude':providers['claude']},'local_models':discover_models(),'account':'Native accounts on this computer'})
+   reply=request('/api/bridge/next',{'connector_id':identity,'signed_in':any(providers.values()),'harness_version':3,'openrouter_capable':True,'providers':providers,'connector_access':{'version':1,'chatgpt':providers['chatgpt'],'claude':providers['claude']},'local_models':discover_models(),'account':'Native accounts on this computer'})
    failures=0
    if reply.get('action'):
     model_action(reply['action'],request);continue

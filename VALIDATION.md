@@ -1,5 +1,15 @@
 # ACENET validation · 2026-09-05
 
+## Astra orchestration v3 and simple chat — 9 September 2026
+
+Live Pages `c904228f`, Worker `28023340-1de1-4991-8fb3-75b839782017`. User reaffirmed Astra as planner/orchestrator and open models as executors, then requested a simple chat with within-chat history and hidden internal work. Replaced new-task default with astra-orchestrator-v3. Every turn plans in Astra, executes ordered steps on an open body, reviews in Astra and permits one body repair. No small-task direct shortcut or silent Luna/Haiku executor fallback. Claude can provide a source-reading gateway under Astra's plan but cannot replace the brain. Explicit baselines are Astra-only.
+
+121 automated checks pass (36 harness, 43 connector, 42 Node), including plan-first order, open-only executor enforcement, bounded repairs, same-tenant parent lookup, earlier messages/attachments, new-chat isolation and package installation importing orchestrator.py. Worker dry-run compiled. Live browser fixtures pass transcript display, Enter-to-send, reply parent binding, New chat reset, hidden details, visible permission/stop controls, mobile width and no JS errors. Browser tests use isolated responses, not live model generation.
+
+Both idle local helpers updated preserving pairing; owner PID 87162 and version-3 heartbeat verified. Owner workspace has no OpenRouter connection/selected local executor. User was asked to connect OpenRouter; real Astra-to-open-model generation remains unverified pending that connection. No test result is represented as a live open-model inference. Model catalogue now requires a public Hugging Face reference as an open-weights indicator plus verified zero prices; this is not license certification. If OpenRouter is connected without a selection, a free model is selected automatically.
+
+Same-chat context stores earlier messages and accepted artifacts; new chats share no memory. Conversation/task limits remain and fail without silent truncation. Raw source reuse, exhaustive folder coverage and broad quality/cost parity remain unimplemented/unproven. The earlier 36.77% benchmark used the previous policy and does not measure v3.
+
 ## Large source review and incomplete-task costs — 9 September 2026
 
 Pages `237ae9f1`; Worker unchanged. User run `8bfb95ba-2400-4a87-b338-218a8b50b73f` fetched approximately 1 MB from Drive and produced a draft, then failed at the hard 80 KB evidence-review limit. Its partial result incorrectly supported a green projected savings display.
