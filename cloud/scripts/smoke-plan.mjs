@@ -1,0 +1,41 @@
+import assert from 'node:assert/strict';
+const base=process.argv[2]||'http://127.0.0.1:8795';
+const stamp=Date.now().toString(36),password='fixture-password-'+stamp;
+async function call(path,data,user,extra={}){
+ const response=await fetch(base+path,{method:data===undefined?'GET':'POST',headers:{...(data===undefined?{}:{'Content-Type':'application/json',Origin:base}),...(user?{Cookie:user.cookie,'X-ACENET-Token':user.token}:{}),...extra},body:data===undefined?undefined:JSON.stringify(data),signal:AbortSignal.timeout(30000)});
+ const text=await response.text();let value;try{value=JSON.parse(text);}catch{value=text;}
+ return {status:response.status,value,cookie:response.headers.get('set-cookie')?.split(';')[0],headers:response.headers};
+}
+const register=async name=>{const r=await call('/api/auth/register',{email:name+'@example.com',password});assert.equal(r.status,200,JSON.stringify(r.value));return {cookie:r.cookie,token:r.value.token,name};};
+assert.equal((await call('/api/health')).value.ready,true);
+assert.equal((await call('/api/runs')).status,401);
+const alice=await register('cfa-'+stamp),bob=await register('cfb-'+stamp);
+const race=await Promise.all([call('/api/auth/register',{email:'cfr-'+stamp+'@example.com',password}),call('/api/auth/register',{email:'cfr-'+stamp+'@example.com',password})]);assert.deepEqual(race.map(r=>r.status).sort(),[200,409]);
+assert.equal((await call('/api/account/pairing',{},alice,{'X-ACENET-Token':'wrong'})).status,401);
+assert.equal((await call('/api/account/pairing',{},alice,{Origin:'https://evil.test'})).status,403);
+const pairing=await call('/api/account/pairing',{},alice);assert.equal(pairing.status,200);
+const redeemed=await Promise.all([call('/api/pair/redeem',{code:pairing.value.code}),call('/api/pair/redeem',{code:pairing.value.code})]);assert.deepEqual(redeemed.map(r=>r.status).sort(),[200,400]);
+const config=redeemed.find(r=>r.status===200).value;assert.equal(config.app,'https://ace-acenet.pages.dev');
+const bridgeHeaders={Authorization:'Bearer '+config.token};
+const heartbeat={connector_id:'hosting-fixture',signed_in:true,providers:{chatgpt:true,claude:false},local_models:{servers:[{id:'ollama',online:true,models:[{id:'qwen3:4b'}]}]}};
+assert.equal((await call('/api/bridge/next',heartbeat,null,bridgeHeaders)).status,200);
+assert.equal((await call('/api/account/local-model',{server:'ollama',model:'qwen3:4b'},alice)).status,200);
+const run=await call('/api/runs',{brief:'HOSTING QA ONLY. Synthetic state, no model calls.'},alice);assert.equal(run.status,200,JSON.stringify(run.value));
+const id=run.value.id;
+assert.equal((await call('/api/runs/'+id,undefined,bob)).status,400);
+assert.equal((await call('/api/state?selected='+id,undefined,bob)).value.detail,null);
+const claims=await Promise.all([call('/api/bridge/next',heartbeat,null,bridgeHeaders),call('/api/bridge/next',heartbeat,null,bridgeHeaders)]);
+const claimed=claims.filter(r=>r.value.run);assert.equal(claimed.length,1);const record=claimed[0].value.run;
+assert.equal(record.config.brain.model,'gpt-6-astra');assert.equal(record.config.body.model,'qwen3:4b');
+const detail={ledger:[],blueprint:null,result:{answer:'Synthetic hosting fixture; no model generated this.',artifacts:[{path:'fixture.txt',content:'Private fixture.'}],uncertainties:[]},reviews:[],steps:{},report:{status:'accepted_by_astra',test_fixture:true}};
+assert.equal((await call('/api/bridge/progress',{id,claim:record.claim,detail},null,bridgeHeaders)).status,200);
+const download=await call('/api/runs/'+id+'/download?path=fixture.txt',undefined,alice);assert.equal(download.value,'Private fixture.');assert.match(download.headers.get('content-disposition'),/attachment/);
+assert.equal((await call('/api/runs/'+id+'/download',undefined,bob)).status,400);
+const state=await call('/api/state?selected='+id,undefined,alice);assert.equal(state.value.runs.length,1);assert.equal(state.value.detail.final,true);assert.equal(state.value.account.local_model.model,'qwen3:4b');
+const second=await call('/api/runs',{brief:'HOSTING QA ONLY. Cancel fixture.'},alice);assert.equal(second.status,200);const claim=(await call('/api/bridge/next',heartbeat,null,bridgeHeaders)).value.run;
+assert.equal((await call('/api/runs/'+claim.id+'/cancel',{},alice)).status,200);
+assert.equal((await call('/api/bridge/progress',{id:claim.id,claim:claim.claim,detail},null,bridgeHeaders)).value.cancelled,true);
+assert.equal((await call('/api/runs/'+claim.id,undefined,alice)).value.report.status,'cancelled');
+assert.equal((await call('/api/auth/logout',{},alice)).status,200);assert.equal((await call('/api/account',undefined,alice)).status,401);
+assert.equal((await call('/api/auth/login',{email:alice.name+'@example.com',password})).status,200);
+console.log(JSON.stringify({result:'PASS',origin:base,checks:['real runtime scrypt registration/login','concurrent email uniqueness','private tenant isolation','CSRF and origin rejection','one-use pairing','bridge bearer authentication','local model preference','single task claim under concurrency','private artifact downloads','combined state polling','cancellation cannot be overwritten','logout invalidation'],modelCalls:0,syntheticRecords:true}));

@@ -1,0 +1,11 @@
+node_modules/
+.wrangler/
+.dev.vars
+.deploy-secrets.json
+access.md
+src/assets.generated.mjs
+worker-configuration.d.ts
+plan-public/
+.plan-secrets.json
+migration-private/
+pages-public/

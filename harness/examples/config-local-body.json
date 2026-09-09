@@ -1,0 +1,5 @@
+{
+  "brain": {"backend": "codex", "model": "gpt-6-astra", "effort": "high", "rates": null},
+  "body": {"backend": "chat", "model": "REPLACE_WITH_INSTALLED_MODEL", "base_url": "http://localhost:11434/v1", "max_output_tokens": 8192, "rates": null},
+  "max_calls": 12, "max_repairs": 1, "max_prompt_bytes": 180000, "stop_after_usd": null
+}

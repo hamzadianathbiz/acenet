@@ -1,0 +1,5 @@
+{
+  "brain": {"backend": "responses", "model": "gpt-6-astra", "key_env": "OPENAI_API_KEY", "effort": "high", "max_output_tokens": 8192, "rates": null},
+  "body": {"backend": "responses", "model": "gpt-5.6-luna", "key_env": "OPENAI_API_KEY", "effort": "medium", "max_output_tokens": 8192, "rates": null},
+  "max_calls": 12, "max_repairs": 1, "max_prompt_bytes": 180000, "stop_after_usd": null
+}

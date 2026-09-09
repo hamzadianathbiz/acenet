@@ -1,0 +1,9 @@
+invoice_id,customer,currency,amount,due_date,status
+I-001,Alder,GBP,1000.00,2026-08-20,paid
+I-002,Birch,GBP,2500.00,2026-08-31,unpaid
+I-002,Birch,GBP,2500.00,2026-08-31,unpaid
+I-003,Cedar,USD,3000.00,2026-09-01,unpaid
+I-004,Alder,GBP,750.00,2026-09-30,unpaid
+I-005,Dune,GBP,-200.00,2026-08-31,credit
+I-006,Elm,GBP,,2026-08-25,unpaid
+I-007,Fir,GBP,1200.00,2026-09-01,void

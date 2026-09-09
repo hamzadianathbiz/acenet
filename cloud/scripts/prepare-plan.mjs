@@ -1,0 +1,15 @@
+import {cp,mkdir,readFile,writeFile} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+const out=new URL('../plan-public/',import.meta.url);
+await mkdir(out,{recursive:true});
+for(const [source,dest] of [['account.html','index.html'],['account.js','account.js'],['cost-comparison.js','cost-comparison.js'],['account.css','account.css'],['ace-tokens.css','ace-tokens.css'],['assets','assets']])await cp(new URL('../../app/public/'+source,import.meta.url),new URL(dest,out),{recursive:true});
+await cp(new URL('../../app/src/attachments.mjs',import.meta.url),new URL('attachments.mjs',out));
+const vendor=new URL('vendor/',out);await mkdir(vendor,{recursive:true});
+await cp(new URL('../node_modules/fflate/esm/browser.js',import.meta.url),new URL('fflate.mjs',vendor));
+for(const name of ['pdf.mjs','pdf.worker.mjs'])await cp(new URL('../node_modules/pdfjs-dist/build/'+name,import.meta.url),new URL(name,vendor));
+for(const dir of ['cmaps','standard_fonts','wasm'])await cp(new URL('../node_modules/pdfjs-dist/'+dir,import.meta.url),new URL(dir+'/',vendor),{recursive:true});
+const config=JSON.parse(await readFile(new URL('../wrangler.plan.jsonc',import.meta.url),'utf8'));
+execFileSync('python3',[fileURLToPath(new URL('../../connector/package.py',import.meta.url)),'--output',fileURLToPath(out),'--app',config.vars.ACENET_PUBLIC_ORIGIN]);
+await writeFile(new URL('_headers',out),"/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: same-origin\n  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'\n");
+console.log('Cloudflare native-plan UI and private-config-free helper bundles prepared.');

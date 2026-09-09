@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "acenet",
+  "main": "plan-runtime/runtime.mjs",
+  "account_id": "27e0cebed199e35e539c8921268e8707",
+  "compatibility_date": "2026-09-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "assets": {"directory": "./plan-public", "binding": "ASSETS", "run_worker_first": ["/api/*"]},
+  "durable_objects": {"bindings": [{"name": "COORDINATOR", "class_name": "Coordinator"}]},
+  "migrations": [{"tag": "plan-v1", "new_sqlite_classes": ["Coordinator"]}],
+  "vars": {"ACENET_PUBLIC_ORIGIN": "https://ace-acenet.pages.dev"},
+  "observability": {"enabled": true, "head_sampling_rate": 0.01}
+}

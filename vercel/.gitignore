@@ -1,0 +1,10 @@
+node_modules/
+.vercel/
+.env*
+access.md
+public/
+lib/worker.generated.mjs
+lib/core.mjs
+lib/schemas.mjs
+.vercel
+.env*.local

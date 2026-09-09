@@ -1,0 +1,30 @@
+{
+  "brain": {
+    "backend": "codex",
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeout": 240,
+    "rates": {
+      "input": 10,
+      "cached_input": 1,
+      "output": 50
+    }
+  },
+  "body": {
+    "backend": "codex",
+    "model": "gpt-5.6-luna",
+    "effort": "medium",
+    "timeout": 240,
+    "rates": {
+      "input": 0.2,
+      "cached_input": 0.02,
+      "output": 1.2
+    }
+  },
+  "max_calls": 12,
+  "max_repairs": 1,
+  "max_prompt_bytes": 180000,
+  "stop_after_usd": null,
+  "rates_as_of": "2026-09-05",
+  "rates_note": "Standard API token-equivalent estimates, not Codex subscription billing; excludes cache-write premiums, tools and hardware. Only below 272K input tokens per request."
+}

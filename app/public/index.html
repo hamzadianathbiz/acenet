@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0e12"><title>ACENET · ACE</title>
+<link rel="icon" href="/assets/ace-mark.png"><link rel="stylesheet" href="/ace-tokens.css"><link rel="stylesheet" href="/styles.css">
+<script src="/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#workspace">Skip to workspace</a>
+<aside class="sidebar" aria-label="Run history">
+ <div class="brand"><img src="/assets/ace-mark.png" alt="ACE" width="42" height="36"><span class="brand-divider"></span><span>ACENET<span class="mono-label">Execution workbench</span></span></div>
+ <button class="btn btn-primary new-run" id="new-run"><span>New run</span><span aria-hidden="true">＋</span></button>
+ <div class="history-heading"><span class="mono-label">Run history</span><span id="history-count" class="mono-label">—</span></div>
+ <div id="history" class="history"><p class="muted small">Loading your runs…</p></div>
+ <div class="sidebar-bottom"><button id="connections" class="nav-button"><span class="settings-icon" aria-hidden="true">↔</span> Connections <span aria-hidden="true">↗</span></button><div class="local-state mono-label"><i class="status-dot"></i><span id="connection-state">Connecting</span><span>v0.2</span></div></div>
+</aside>
+<div class="app-shell">
+ <header class="topbar"><div><span class="mono-label">ACE / SYSTEMS</span><span class="slash">/</span><span id="breadcrumb">New run</span></div><button class="text-button" id="top-connections">Model connections <span aria-hidden="true">↗</span></button></header>
+ <main id="workspace">
+  <section id="compose-view" class="chat-home">
+   <div class="page-heading"><div><div class="eyebrow mono-label">ACE / ACENET</div><h1>What should we work on?</h1><p>Give it a task. Astra takes it from here.</p></div></div>
+   <form id="run-form">
+    <section class="brief-panel panel">
+     <label class="sr-only" for="brief">Task brief</label><textarea id="brief" placeholder="Describe a task, ask for a plan, or build something…" required maxlength="80000"></textarea>
+     <div id="file-list"></div>
+     <div class="chat-toolbar"><div class="chat-tools"><label for="attachments" class="attach-button" title="Attach context">＋<span class="sr-only">Attach files</span></label><input type="file" id="attachments" multiple accept=".txt,.md,.json,.csv,.py,.js,.ts,.html,.css,.yaml,.yml,.xml,.sql" class="sr-only"><span class="auto-label"><i class="status-dot"></i><span id="route-label">Automatic routing</span></span></div><button class="btn btn-primary run-button" id="run-button" type="submit" aria-label="Run task">↑</button></div>
+    </section>
+    <p id="form-error" class="error-message" role="alert" hidden></p>
+    <div class="composer-caption"><span id="char-count">0 characters</span><span>Astra plans + reviews · lowest-cost eligible body</span></div>
+    <div class="suggestions"><button type="button" data-suggestion="Build a complete function that ">Build something ↗</button><button type="button" data-suggestion="Write a clear, practical document about ">Write a document ↗</button><button type="button" data-suggestion="Analyze the attached material and produce ">Analyze material ↗</button><button type="button" id="use-example">Try an example ↗</button></div>
+    <details class="advanced-options"><summary>Models & limits <span class="mono-label">Optional</span></summary><div class="advanced-grid">
+     <aside class="routing-panel panel" aria-label="Model routing"><div class="panel-heading"><span class="mono-label">The team</span><span class="mono-label">Quality first, cost aware</span></div>
+      <div class="route-card"><div class="node-symbol brain-symbol" aria-hidden="true">A</div><div class="route-copy"><div class="mono-label">Brain / Plan + review</div><h2>GPT-6 Astra</h2><p>Defines the task and checks the result.</p></div></div>
+      <div class="body-card"><div class="route-card"><div class="node-symbol" id="body-symbol" aria-hidden="true">↳</div><div class="route-copy"><label for="body-provider" class="mono-label">Body / Execute + repair</label><select id="body-provider"><option value="auto" selected>Automatic · lowest eligible cost</option><option value="luna">GPT-5.6 Luna</option><option value="ollama">Open model · Ollama</option><option value="lmstudio">Open model · LM Studio</option><option value="custom">Custom endpoint</option></select></div></div><p id="body-description" class="body-description">Astra defines which models fit. The harness picks the lowest estimated cost.</p>
+       <div id="endpoint-fields" hidden><label class="field-label" for="body-url">Server endpoint</label><input type="url" id="body-url" placeholder="https://your-model-server/v1" spellcheck="false" autocomplete="off"><div class="model-label-row"><label class="field-label" for="body-model">Model ID</label><button type="button" id="discover" class="text-button">Discover models ↻</button></div><input id="body-model" list="model-list" placeholder="Enter an exact model ID" spellcheck="false" autocomplete="off"><datalist id="model-list"></datalist><p id="discovery-status" class="small muted" role="status">Choose a model already installed on your server.</p><button type="button" class="text-button body-key-link" id="body-key-link">Manage endpoint key ↗</button></div>
+      </div></aside>
+      <div class="run-options"><div class="option-controls"><label>Repair attempts <select id="max-repairs"><option value="0">None</option><option value="1" selected>1 attempt</option><option value="2">2 attempts</option><option value="3">3 attempts</option></select></label><label>Call limit <input id="max-calls" type="number" min="3" max="30" value="12"></label><label class="estimate-option"><input type="checkbox" id="use-prices" checked> Estimate token cost</label></div><span id="run-hint" class="small muted">Text attachments · 150 KB total</span></div>
+    </div></details>
+   </form>
+   <div class="bottom-note"><p>Your brief stays intact. Every decision, output and cost stays visible.</p></div>
+  </section>
+  <section id="detail-view" hidden>
+   <div class="detail-heading"><div><div class="eyebrow mono-label" id="run-id"></div><h1 id="run-title"></h1></div><span class="status-label" id="run-status"></span></div>
+   <div class="detail-actions"><button class="btn btn-sm" id="reuse-brief">Reuse brief ↗</button><button class="btn btn-sm" id="run-baseline">Run Astra baseline</button><button class="btn btn-sm" id="stop-run" hidden>Stop run</button><a class="btn btn-primary btn-sm" id="download-answer" hidden>Download answer ↓</a></div>
+   <div id="run-error" class="notice" role="status" hidden></div>
+   <div class="execution-strip" id="execution-strip"></div>
+   <div class="metric-row"><div><span class="mono-label">Model calls</span><span id="metric-calls">—</span></div><div><span class="mono-label">Total tokens</span><span id="metric-tokens">—</span></div><div><span class="mono-label">Estimated token cost</span><span id="metric-cost">—</span></div><div><span class="mono-label">Quality parity</span><span class="metric-text">Not measured</span></div></div>
+   <div class="result-panel panel"><div class="tabs" role="tablist" aria-label="Run details"><button role="tab" aria-selected="true" id="tab-output" data-tab="output">Output</button><button role="tab" aria-selected="false" id="tab-blueprint" data-tab="blueprint">Blueprint</button><button role="tab" aria-selected="false" id="tab-review" data-tab="review">Review</button><button role="tab" aria-selected="false" id="tab-usage" data-tab="usage">Usage</button><button role="tab" aria-selected="false" id="tab-brief" data-tab="brief">Original brief</button></div><div id="tab-content" role="tabpanel" aria-labelledby="tab-output" tabindex="0"></div></div>
+   <div id="comparison" class="comparison panel" hidden><div><span class="mono-label">Astra-only comparison</span><p>Same brief. Independent execution.</p></div><div class="compare-controls"><label for="baseline-select" class="sr-only">Baseline run</label><select id="baseline-select"></select><button id="compare-button" class="btn btn-sm">Compare costs</button></div><div id="compare-result" aria-live="polite"></div></div>
+   <p class="cost-footnote">Token costs use configured rates. They exclude subscription fees, hardware and tool charges.</p>
+  </section>
+ </main>
+ <footer class="app-footer"><span class="mono-label">ACE / AI deployment co.</span><span class="mono-label">Directed by Astra. Built for less.</span></footer>
+</div>
+<dialog id="connections-dialog"><form id="connections-form"><div class="dialog-heading"><div><span class="mono-label">Workspace settings</span><h2>Model connections</h2></div><button type="button" id="close-connections" class="icon-button" aria-label="Close connections">×</button></div><p class="muted">Choose how this machine reaches your models.</p><div id="workspace-unlock" hidden><label class="field-label" for="workspace-password">Workspace password</label><input type="password" id="workspace-password" autocomplete="current-password" placeholder="Enter your workspace password"></div><label class="field-label" for="brain-backend">Astra connection</label><select id="brain-backend"><option value="codex">Codex login on this Mac</option><option value="responses">OpenAI API</option></select><p class="small muted" id="codex-state">Checking Codex…</p><div id="brain-key-field" hidden><label class="field-label" for="brain-key">OpenAI API key</label><input type="password" id="brain-key" placeholder="Use server environment or enter a key" autocomplete="off"><p class="small muted">Also used for Luna when OpenAI API is selected.</p></div><label class="field-label" for="body-key">Open-model endpoint key <span class="muted">(optional)</span></label><input type="password" id="body-key" placeholder="Usually unnecessary for a local model" autocomplete="off"><div class="session-note">Keys stay in this browser session and the running job. They are not saved to disk. Astra still uses its cloud connection when the body runs locally.</div><details><summary>Custom body token prices</summary><p class="small muted">USD per million tokens. Leave blank for unknown cost.</p><div class="price-fields"><label>Input<input id="price-input" type="number" step="any" min="0" placeholder="Unknown"></label><label>Cached<input id="price-cached" type="number" step="any" min="0" placeholder="Unknown"></label><label>Output<input id="price-output" type="number" step="any" min="0" placeholder="Unknown"></label></div></details><div class="dialog-footer"><button type="button" id="clear-keys" class="text-button">Clear session keys</button><button type="submit" class="btn btn-primary">Save connections</button></div></form></dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+</body></html>

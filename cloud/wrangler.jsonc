@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "acenet",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-05",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "durable_objects": {"bindings": [{"name": "WORKSPACE", "class_name": "Workspace"}]},
+  "migrations": [{"tag":"v1","new_sqlite_classes":["Workspace"]}],
+  "ai": {"binding":"AI"},
+  "observability": {"enabled":true,"head_sampling_rate":0.1}
+}

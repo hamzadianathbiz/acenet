@@ -1,0 +1,160 @@
+/* ==========================================================================
+   ACE Design Tokens: the "Oxide" system
+   Canonical source: projects/ace-rebrand/ace-tokens.css
+   Extracted 2026-08-26 from the live site (acedeployed.com/styles.css).
+
+   THIS FILE IS THE SOURCE OF TRUTH FOR EVERY ACE SURFACE.
+   Copies live in each consuming project. If you change a value here,
+   propagate it: scripts/sync-tokens.sh
+
+   Rules that are not colours, and matter just as much:
+     1. Weight 400 almost everywhere. The site loads only Inter 400 and
+        IBM Plex Mono 400. Headings are NOT bold. Weight 500 is permitted
+        only on tabular figures, where it aids scanning.
+     2. border-radius: 1px. Effectively square. Never a pill, never a 8px card.
+     3. 1px --slate hairlines do all the structural work. No drop shadows,
+        no gradient cards, no soft elevation.
+     4. Mono is for microtype: 9-10px, uppercase, .064em tracking. Nav labels,
+        table headers, eyebrows, buttons, badges, status. Never body copy.
+     5. --green is not a decorative colour. It marks live state, focus,
+        the active item, and the primary action. Nothing else.
+   ========================================================================== */
+
+:root{
+  /* --- Surfaces: void is the ground, each step up is a raised plane ------ */
+  --void:#0b0e12;        /* page ground */
+  --carbon:#181a1d;      /* panel, card, table header */
+  --graphite:#1f2124;    /* hover plane, inset well */
+  --slate:#303235;       /* every border and hairline */
+
+  /* --- Text ramp: fog is nearly invisible, bone is body copy ------------- */
+  --fog:#5d5e61;         /* disabled, placeholder */
+  --steel:#818284;       /* microtype labels */
+  --ash:#a3a4a5;         /* secondary body */
+  --silver:#bababb;      /* nav, interactive rest state */
+  --bone:#dedede;        /* primary body and headings */
+
+  /* --- Accent: the single green, plus its two fills ---------------------- */
+  --green:#00d892;
+  --teal:#002923;        /* primary button ground */
+  --emerald:#005441;     /* primary button border, hover ground */
+  --violet:#c58aff;      /* rare secondary accent */
+
+  /* --- Type -------------------------------------------------------------- */
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"Inter",Helvetica,Arial,sans-serif;
+
+  /* --- Layout ------------------------------------------------------------ */
+  --shell:min(1200px,calc(100vw - 64px));
+  --radius:1px;
+  --hair:1px solid var(--slate);
+
+  /* ======================================================================
+     EXTENSION LAYER: not on the marketing site.
+     The site has no tables, no pipelines and no charts, so it never needed
+     status colour. Every data surface (portals, tracker, reports) does.
+     These are derived from the palette above, not invented alongside it.
+     ====================================================================== */
+
+  /* Status. Green already means "live", so it carries "won" unchanged.
+     Violet is the site's own secondary accent and takes "in motion".
+     Amber is the one genuinely new hue, and exists because warning cannot
+     be read from a green/violet/grey ramp. Grey recedes, as parked should. */
+  --ok:#00d892;          /* won, signed, healthy, complete */
+  --active:#c58aff;      /* in motion, negotiating, in progress */
+  --warn:#e3b341;        /* overdue, at risk, needs attention */
+  --idle:#818284;        /* parked, inactive, not started */
+  --dead:#5d5e61;        /* lost, withdrawn, archived */
+
+  /* Status fills. 12% over void reads as a tint, not a block, at any size. */
+  --ok-fill:rgb(0 216 146 / 12%);
+  --active-fill:rgb(197 138 255 / 12%);
+  --warn-fill:rgb(227 179 65 / 12%);
+  --idle-fill:rgb(129 130 132 / 12%);
+
+  /* Interactive control boundary. --slate (1.5:1 on void) is correct for
+     structural hairlines: table rules, panel edges and dividers are decorative
+     under WCAG 1.4.11 and exempt. An input, select or button border is NOT
+     exempt: it identifies the component and owes 3:1. This is the smallest
+     step off --slate that clears it (3.68:1 on void, 3.31:1 on carbon) while
+     still reading as a hairline rather than an outline.
+     Use --slate for structure. Use this for anything the user can operate. */
+  --control-line:#6a6c70;
+
+  /* Categorical series for charts, in application order. Green leads because
+     the first series is usually the subject. */
+  --series-1:#00d892;
+  --series-2:#c58aff;
+  --series-3:#5a9ad4;
+  --series-4:#e3b341;
+  --series-5:#818284;
+}
+
+/* --- Base ---------------------------------------------------------------
+   Applied by every ACE surface. Anything that sets its own body background
+   has diverged from the system.
+   ------------------------------------------------------------------------ */
+*{margin:0;padding:0;box-sizing:border-box}
+/* color-scheme tells the browser to render native controls dark: date pickers,
+   select popups, scrollbars, spinners. Without it they arrive white. */
+html{background:var(--void);color-scheme:dark;-webkit-font-smoothing:antialiased}
+body{
+  background:var(--void);
+  color:var(--bone);
+  font-family:var(--sans);
+  font-size:14px;
+  font-weight:400;
+  line-height:1.38;
+}
+h1,h2,h3,h4{font-weight:400;letter-spacing:-.01em}
+a{color:inherit;text-decoration:none}
+button{color:inherit;font:inherit}
+img{display:block;max-width:100%}
+
+/* Focus is green, offset, and square. Same on every surface. */
+:focus-visible{outline:1px solid var(--green);outline-offset:2px}
+
+/* --- Shared primitives ---------------------------------------------------
+   The three things every ACE surface repeats. Defined once here so a portal,
+   a report and a deck cannot drift apart on them.
+   ------------------------------------------------------------------------ */
+
+/* Microtype: the mono uppercase label. The most recognisable ACE signature. */
+.mono-label{
+  font-family:var(--mono);
+  font-size:10px;
+  line-height:1.6;
+  letter-spacing:.064em;
+  text-transform:uppercase;
+  color:var(--steel);
+}
+
+/* Dot grid. Used behind heroes, empty states and console panels. */
+.dot-grid{
+  background-image:radial-gradient(circle,rgb(129 130 132 / 22%) 1px,transparent 1px);
+  background-size:16px 16px;
+}
+
+/* Buttons. Primary is a teal well with a green rule, never a solid green slab. */
+.btn{
+  display:inline-flex;min-height:36px;width:fit-content;align-items:center;
+  justify-content:center;gap:14px;padding:8px 14px;
+  border:1px solid var(--control-line);border-radius:var(--radius);
+  background:transparent;color:var(--silver);
+  font-family:var(--mono);font-size:10px;line-height:1.6;
+  letter-spacing:.064em;text-transform:uppercase;cursor:pointer;
+  transition:background-color 160ms linear,border-color 160ms linear,color 160ms linear;
+}
+.btn:hover{border-color:var(--ash);color:var(--bone)}
+.btn-primary{border-color:var(--emerald);background:var(--teal);color:var(--green);
+  box-shadow:inset 0 0 0 1px rgb(0 216 146 / 15%)}
+.btn-primary:hover{border-color:var(--green);background:var(--emerald)}
+.btn-sm{min-height:28px;padding:5px 10px;font-size:9px;gap:8px}
+.btn:disabled{opacity:.4;cursor:default}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}

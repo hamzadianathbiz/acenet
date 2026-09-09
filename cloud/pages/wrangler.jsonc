@@ -1,0 +1,15 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "ace-acenet",
+  "compatibility_date": "2026-09-07",
+  "pages_build_output_dir": "../pages-public",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "COORDINATOR",
+        "class_name": "Coordinator",
+        "script_name": "acenet"
+      }
+    ]
+  }
+}
