@@ -153,3 +153,9 @@ Replaced draft-first routing with Astra plan, open-model execution and Astra rev
 The main UI now shows a conversation and composer. Follow-ups carry same-tenant chat messages, accepted answers and attachments; New chat starts fresh. Details and costs are collapsed. Cross-conversation memory is deferred.
 
 Pages c904228f and Worker 28023340-1de1-4991-8fb3-75b839782017 deployed. 121 automated checks and canonical browser fixtures pass; deployed asset hashes match. Actual open-model inference and v3 savings remain unverified pending executor connection.
+
+## [2026-09-09] fix | Missing executor connection recovery
+
+Replaced the amber missing-executor error with a direct Connect free models dialog. OAuth opens separately, keeps the pending message and attachments in the original chat, and resumes once after connection. Model selection remains automatic. Cancellation and New chat do not send; blocked popups get an explicit sign-in link. Renamed the app's global open function so native popup creation works.
+
+Worker 7ab077ce-36f1-40b7-bc50-b82f6679285a and Pages ae02e441 live. 42 Node tests, local/canonical browser fixtures and canonical asset hashes pass. Authenticated missing-setup probe creates no run or model spend. Actual third-party login/inference not performed.

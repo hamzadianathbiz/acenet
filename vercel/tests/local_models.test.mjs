@@ -52,7 +52,7 @@ test('a missing selected model blocks execution until explicitly cleared without
  await assert.rejects(()=>post(s,'/api/runs',{brief:'A task'}),/selected local model is unavailable/);
  assert.equal(await s.get('active'),undefined);
  await post(s,'/api/account/local-model/clear');
- await assert.rejects(()=>post(s,'/api/runs',{brief:'A task'}),/open-model executor/);
+ assert.equal((await post(s,'/api/runs',{brief:'A task'})).code,'executor_setup_required');
 });
 
 test('downloads require a live helper, online Ollama, an allowlisted model and no active task',async()=>{

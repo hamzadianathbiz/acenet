@@ -1,3 +1,9 @@
+## Free-model connection recovery — 9 September 2026
+
+Pages `ae02e441`, Worker `7ab077ce-36f1-40b7-bc50-b82f6679285a`. Missing executor setup returns HTTP 400 with `executor_setup_required` and creates no task; authenticated production probe verified this without inference. Main UI opens a direct connection dialog, retains draft/files/parent in the original tab during OAuth, and resumes once after the refreshed account reports connected. Cancel/New chat prevents resumption. Existing connected OpenRouter accounts need no manual selection. The app's old global `open` function was renamed `openRun` because it shadowed native popup creation.
+
+42 Node tests and UI syntax checks pass. New `app/tests/executor-setup.browser.mjs` passes on local assets and the canonical production site, covering OAuth callback/resume exactly once, same-chat parent and files, cancel/New chat, blocked popups, mobile width, connected accounts and stale state. Browser API/provider responses are fixtures; actual third-party sign-in and open-model inference were not performed. Production HTML/JS/CSS match local release hashes. Browser integration had no available browser, so an isolated standalone Chrome test was used.
+
 # ACENET validation · 2026-09-05
 
 ## Astra orchestration v3 and simple chat — 9 September 2026

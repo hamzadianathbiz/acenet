@@ -15,13 +15,15 @@ Production app: **https://ace-acenet.pages.dev**
 
 **Hosting, 7 September 2026:** live on Cloudflare Pages with private SQLite Durable Object storage. Hamza approved a fresh workspace because Vercel cannot export its quota-suspended store. The old 40 records remain untouched for later recovery. Existing invited users must create a new ACENET account and pair the updated helper. The owner password still works and the owner helper has been moved. No paid hosting upgrade was activated. Free-tier limits still apply; see `cloud/README.md`.
 
-**Live update, 9 September:** Pages `c904228f`, Worker `28023340-1de1-4991-8fb3-75b839782017`. The main surface is a chat with same-conversation history; work details and cost are collapsed. Separate chats do not share memory.
+**Live update, 9 September:** Pages `ae02e441`, Worker `7ab077ce-36f1-40b7-bc50-b82f6679285a`. The main surface is a chat with same-conversation history; work details and cost are collapsed. Separate chats do not share memory.
 
 Every normal turn follows Astra plan → open-model execution → Astra review, with at most one repair performed by the open model. Astra defines one to three ordered steps and acceptance criteria. No draft-first policy, direct-Astra shortcut or native executor fallback is used for new normal tasks. Explicit measured baselines still use Astra alone.
 
 Connect ChatGPT for Astra and OpenRouter for a hosted executor, or select an available local model. OpenRouter automatically chooses an available zero-priced model with a published Hugging Face model reference when no selection exists. Public weights are not a blanket OSI license guarantee. Native account readers can retrieve connected sources under Astra's plan: ChatGPT uses Astra for retrieval; Claude uses a narrowly scoped Haiku source-reader. Deliverables, assembly and repairs remain with the open executor.
 
 The pipeline and chat tests pass, but real OpenRouter inference remains unverified until an account is connected. The accessible owner workspace currently has no OpenRouter connection or local executor; missing setup stops before queueing/model spend. The installed helpers are version 3.
+
+Submitting without an executor now opens a direct **Connect free models** dialog. OpenRouter sign-in uses a separate window, keeping the prompt, attachments and current chat in place. After connection, the pending message resumes once with automatic free-model selection. Closing setup or starting a new chat cancels automatic sending. No prompt or file is placed in OAuth URLs or browser storage.
 
 ## Start: your own account and subscription
 

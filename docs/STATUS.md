@@ -2,7 +2,9 @@
 
 Live site: https://ace-acenet.pages.dev
 Public source: https://github.com/hamzadianathbiz/acenet
-Pages release: c904228f. Worker: 28023340-1de1-4991-8fb3-75b839782017.
+Pages release: ae02e441. Worker: 7ab077ce-36f1-40b7-bc50-b82f6679285a.
+
+The missing-executor amber dead end is replaced by a direct connection dialog: sign in separately, retain the draft/files/chat, and resume once. Cancel/New chat prevents sending. Canonical browser fixture tests and the authenticated no-queue setup response pass. Real OpenRouter sign-in and inference still require the user connection.
 
 ## Current workflow
 One chat composer, accepted replies and follow-up context. Work details and cost are collapsed. New chat starts a separate conversation; cross-chat memory is deferred.
