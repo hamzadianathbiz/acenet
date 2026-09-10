@@ -12,8 +12,11 @@ export async function catalog(){if(cached&&Date.now()-cached.at<60000)return cac
 export async function openrouterStatus(storage){return {connected:!!await storage.get('openrouter-key')};}
 export async function openrouterRoute(request,storage){const url=new URL(request.url),p=url.pathname;if(!p.startsWith('/api/account/openrouter/'))return null;const method=request.method;
  if(p.endsWith('/models')&&method==='GET')return json({models:await catalog()});
+ if(p.endsWith('/pending')&&method==='GET'){const pending=await storage.get('openrouter-pkce');return json({state:pending?.expires>Date.now()?pending.state:null});}
  if(method!=='POST')return null;
  if(p.endsWith('/start')){
+  // A stale tab must not replace a durable connection with another authorization flow.
+  if((await openrouterStatus(storage)).connected)return json({connected:true});
   const d=await request.json();let draft=null;
   if(d.draft){
    const v=d.draft;assert('Invalid chat draft.',typeof v.task==='string'&&v.task.length<=80000&&typeof v.drive_query==='string'&&v.drive_query.length<=4000&&['auto','chatgpt','claude'].includes(v.provider)&&['chatgpt','claude'].includes(v.drive_provider)&&typeof v.resume==='boolean');
@@ -38,8 +41,10 @@ export async function openrouterRoute(request,storage){const url=new URL(request
  }
  if(p.endsWith('/finish')){
   const d=await request.json(),pending=await storage.get('openrouter-pkce');
+  const codeHash=typeof d.code==='string'?hash(d.code).toString('hex'):null;
+  if(pending?.connected&&pending.state===d.state&&codeHash&&pending.code_hash===codeHash&&(await openrouterStatus(storage)).connected)return json({connected:true});
   assert('OpenRouter connection expired. Please try again.',pending&&pending.expires>Date.now()&&!pending.consumed&&typeof d.state==='string'&&d.state===pending.state&&typeof d.code==='string'&&d.code.length>0&&d.code.length<2000);
-  await storage.put('openrouter-pkce',{...pending,consumed:true});
+  await storage.put('openrouter-pkce',{...pending,consumed:true,code_hash:codeHash});
   const result=await remote('auth/keys',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:d.code,code_verifier:pending.verifier,code_challenge_method:'S256'})});
   assert('OpenRouter returned no valid key.',typeof result.key==='string'&&result.key.startsWith('sk-or-')&&result.key.length<1024);
   await storage.put('openrouter-key',seal(result.key,storage.tenant));

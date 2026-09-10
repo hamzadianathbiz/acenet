@@ -15,15 +15,17 @@ Production app: **https://ace-acenet.pages.dev**
 
 **Hosting, 7 September 2026:** live on Cloudflare Pages with private SQLite Durable Object storage. Hamza approved a fresh workspace because Vercel cannot export its quota-suspended store. The old 40 records remain untouched for later recovery. Existing invited users must create a new ACENET account and pair the updated helper. The owner password still works and the owner helper has been moved. No paid hosting upgrade was activated. Free-tier limits still apply; see `cloud/README.md`.
 
-**Live update, 9 September:** Pages `c928cf29`, Worker `346d6e72-6c00-4970-adbf-4ab756a7f696`. The main surface is a chat with same-conversation history; work details and cost are collapsed. Separate chats do not share memory.
+**Live update, 10 September:** Pages `c78d123a`, Worker `076fc17a-ea06-474b-87d2-3efb251cd1f3`. The main surface is a chat with same-conversation history; work details and cost are collapsed. Separate chats do not share memory.
 
 Every normal turn follows Astra plan → open-model execution → Astra review, with at most one repair performed by the open model. Astra defines one to three ordered steps and acceptance criteria. No draft-first policy, direct-Astra shortcut or native executor fallback is used for new normal tasks. Explicit measured baselines still use Astra alone.
 
 Connect ChatGPT for Astra and OpenRouter for a hosted executor, or select an available local model. OpenRouter automatically chooses an available zero-priced model with a published Hugging Face model reference when no selection exists. Public weights are not a blanket OSI license guarantee. Native account readers can retrieve connected sources under Astra's plan: ChatGPT uses Astra for retrieval; Claude uses a narrowly scoped Haiku source-reader. Deliverables, assembly and repairs remain with the open executor.
 
-The pipeline and chat tests pass, but real OpenRouter inference remains unverified until an account is connected. The accessible owner workspace currently has no OpenRouter connection or local executor; missing setup stops before queueing/model spend. The installed helpers are version 3.
+The pipeline and chat tests pass, but real OpenRouter inference remains unverified until an account is connected. The accessible owner workspace had no OpenRouter connection or local executor when checked on 9 September; missing setup stops before queueing/model spend. The installed helpers are version 3.
 
 Without a connected executor, the composer shows **Connect & send**. It saves a bounded draft in the private tenant workspace and opens OpenRouter in the same tab. A successful sign-in restores the prompt, attachments and chat, then sends once with automatic free-model selection. Browser Back, decline or expiry restores the draft without sending. Models settings can connect without sending. Only an opaque flow ID stays in tab storage; prompts and files never enter OAuth URLs. Setup popups and stacked setup dialogs have been removed.
+
+Successful OpenRouter connections are reused across messages, new chats and page reloads. The callback accepts a code-only return, recovering the pending state from the authenticated workspace if tab storage was lost. A stale browser status cannot restart OAuth when the server already holds a connection. Repeating the same successful callback reuses the saved key without exchanging the code again.
 
 ## Start: your own account and subscription
 
@@ -43,7 +45,7 @@ Existing owner access remains under **Existing workspace owner**, using `vercel/
 
 ## Hosted free models through OpenRouter
 
-Open **Models → Connect OpenRouter**, sign in on OpenRouter, then choose a free model and **Use this model**. No model downloads, Ollama installation or API-key copy/paste is required. This is hosted inference: task content goes to OpenRouter and its selected provider. Your native subscription helper still runs planning/review and coordinates the task; existing users must rerun setup once to update it.
+Use **Connect & send** in the composer, or **Models → Connect OpenRouter**. Sign in on OpenRouter once; ACENET chooses a free model automatically. The model picker remains optional. No model downloads, Ollama installation or API-key copy/paste is required. This is hosted inference: task content goes to OpenRouter and its selected provider. Your native subscription helper still runs planning/review and coordinates the task; existing users must rerun setup once to update it.
 
 The picker reads the live OpenRouter catalogue and admits only explicit `:free` text models with all reported prices zero and adequate context. Calls recheck pricing, set zero prompt/completion/request/image price ceilings, disable provider fallbacks and truncation transforms, and never substitute a paid variant. Free capacity/rate limits can stop a task. Schema validation and planning-model review still apply; quality parity is not guaranteed.
 

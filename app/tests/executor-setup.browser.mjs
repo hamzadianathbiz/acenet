@@ -12,18 +12,18 @@ class Store{tenant='test';data=new Map();async get(k){return structuredClone(thi
 const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true});
 const origin=process.env.ACENET_TEST_URL||'http://127.0.0.1:8776';
 const prior={id:'first',conversation_id:'first',title:'Use GBP',user_message:'Use GBP',source:{brief:'Use GBP',context:[]},config:{brain:{backend:'codex'}},report:{status:'accepted_by_astra'},result:{answer:'I will use GBP.',artifacts:[]},ledger:[],reviews:[],final:true};
-async function fixture({connected=false}={}){
- const context=await browser.newContext(),page=await context.newPage(),store=new Store(),errors=[];let failStart=false;
+async function fixture({connected=false,codeOnly=false}={}){
+ const context=await browser.newContext(),page=await context.newPage(),store=new Store(),errors=[];let failStart=false,starts=0,finishes=0;
  await store.put('bridge',{signed_in:true,seen:Date.now(),harness_version:3,providers:{chatgpt:true},openrouter_capable:true});await store.put('run:first',prior);
  if(connected)await store.put('openrouter-key',seal('sk-or-fixture',store.tenant));
  context.on('page',p=>p.on('pageerror',e=>errors.push(e.message)));page.on('pageerror',e=>errors.push(e.message));
  await context.route('https://openrouter.ai/auth?**',route=>{
-  const callback=new URL(new URL(route.request().url()).searchParams.get('callback_url'));callback.searchParams.set('code','fixture-code');
+  const callback=new URL(new URL(route.request().url()).searchParams.get('callback_url'));callback.searchParams.set('code','fixture-code');if(codeOnly)callback.searchParams.delete('or_state');
   const denied=new URL(callback);denied.searchParams.delete('code');denied.searchParams.set('error','access_denied');
   return route.fulfill({contentType:'text/html',body:`<h1>OpenRouter provider fixture</h1><a href="${callback.href.replaceAll('&','&amp;')}">Finish sign-in</a><a href="${denied.href.replaceAll('&','&amp;')}">Decline</a>`});
  });
  await context.route('**/api/**',async route=>{
-  const req=route.request(),u=new URL(req.url()),path=u.pathname;let response;
+  const req=route.request(),u=new URL(req.url()),path=u.pathname;let response;if(path.endsWith('/start'))starts++;if(path.endsWith('/finish'))finishes++;
   try{
    if(path==='/api/bootstrap')response=Response.json({locked:false,token:'fixture-session',state_poll:true});
    else if(path==='/api/state')response=Response.json({account:await (await planRoute(new Request(new URL('/api/account',origin)),store)).json(),runs:[...store.data.entries()].filter(([k])=>k.startsWith('run:')).map(([,v])=>v).reverse(),detail:await store.get('run:'+u.searchParams.get('selected'))||null});
@@ -35,10 +35,22 @@ async function fixture({connected=false}={}){
   await route.fulfill({status:response.status,body:await response.text(),contentType:'application/json'});
  });
  await page.goto(origin);await page.waitForFunction(()=>typeof S!=='undefined'&&!S.locked&&!!S.account);
- return {context,page,store,errors,runs:()=>[...store.data.entries()].filter(([k])=>k.startsWith('run:')&&k!=='run:first').map(([,r])=>r),fail:()=>{failStart=true;}};
+ return {context,page,store,errors,starts:()=>starts,finishes:()=>finishes,runs:()=>[...store.data.entries()].filter(([k])=>k.startsWith('run:')&&k!=='run:first').map(([,r])=>r),fail:()=>{failStart=true;}};
 }
 async function typeAndConnect(f,text='yo'){await f.page.locator('#task').fill(text);await f.page.locator('#submit').click();await f.page.waitForURL('https://openrouter.ai/auth?**');assert.equal(f.context.pages().length,1);}
 try{
+ // The provider contract guarantees a code, not preservation of our custom query.
+ for(const clearMarker of [false,true]){
+  const f=await fixture({codeOnly:true});await typeAndConnect(f,'First connected message');
+  if(clearMarker)await f.context.addInitScript(()=>{if(location.search.includes('code='))sessionStorage.removeItem('acenet-openrouter-flow');});
+  await f.page.getByRole('link',{name:'Finish sign-in'}).click();
+  await f.page.waitForFunction(()=>typeof S!=='undefined'&&!!S.selected,null,{timeout:7000});
+  assert.equal(f.runs().length,1);assert.equal(f.starts(),1);assert.equal(f.finishes(),1);
+  async function complete(){const r=f.runs().at(-1);r.report.status='accepted_by_astra';r.result={answer:'Completed',artifacts:[]};await f.store.put('run:'+r.id,r);await f.store.put('active',null);}
+  await complete();await f.page.reload();await f.page.waitForFunction(()=>typeof S!=='undefined'&&S.detail?.report.status==='accepted_by_astra');
+  await f.page.locator('#task').fill('Follow up');await f.page.locator('#submit').click();await f.page.waitForFunction(()=>typeof S!=='undefined'&&S.detail?.report.status==='queued');assert.equal(f.runs().length,2);
+  await complete();await f.page.locator('#new').click();await f.page.locator('#task').fill('A new conversation');await f.page.locator('#submit').click();await f.page.waitForFunction(()=>typeof S!=='undefined'&&S.detail?.user_message==='A new conversation');assert.equal(f.runs().length,3);assert.equal(f.starts(),1);assert.equal(f.finishes(),1);assert.deepEqual(f.errors,[]);await f.context.close();
+ }
  const f=await fixture();await f.page.evaluate(async()=>{await openRun('first');S.files=[{name:'numbers.txt',content:'42'}];files();});
  await typeAndConnect(f,'Double those figures');await f.page.getByRole('link',{name:'Finish sign-in'}).click();await f.page.waitForFunction(()=>typeof S!=='undefined'&&S.selected&&S.selected!=='first');
  assert.equal(f.runs().length,1);const run=f.runs()[0];assert.equal(run.parent_id,'first');assert.equal(run.user_message,'Double those figures');assert(run.source.brief.includes('Use GBP'));assert.deepEqual(run.source.context,[{name:'numbers.txt',content:'42'}]);assert.equal(run.config.body.backend,'openrouter');assert.equal(run.config.brain.model,'gpt-6-astra');assert.equal(await f.page.locator('dialog[open]').count(),0);assert.equal(f.context.pages().length,1);
@@ -53,7 +65,8 @@ try{
   await f.page.locator('#new').click();assert.equal(await f.page.locator('#task').inputValue(),'');await f.context.close();
  }
  const failed=await fixture();failed.fail();await failed.page.locator('#task').fill('Still here');await failed.page.locator('#submit').click();await failed.page.getByText('Connection is temporarily unavailable.',{exact:true}).first().waitFor();assert.equal(await failed.page.locator('#task').inputValue(),'Still here');assert.equal(failed.runs().length,0);assert.equal(failed.context.pages().length,1);await failed.context.close();
+ const stale=await fixture();await stale.store.put('openrouter-key',seal('sk-or-saved',stale.store.tenant));await stale.page.locator('#task').fill('Use my saved connection');await stale.page.locator('#submit').click();await stale.page.waitForFunction(()=>typeof S!=='undefined'&&!!S.selected);assert.equal(stale.runs().length,1);assert.equal(stale.starts(),1);assert.equal(stale.finishes(),0);assert.equal(new URL(stale.page.url()).origin,origin);assert.deepEqual(stale.errors,[]);await stale.context.close();
  const ready=await fixture({connected:true});await ready.page.locator('#task').fill('Send now');await ready.page.locator('#submit').click();await ready.page.waitForFunction(()=>typeof S!=='undefined'&&!!S.selected);assert.equal(ready.runs().length,1);assert.equal(await ready.page.locator('dialog[open]').count(),0);await ready.context.close();
  const mobile=await fixture();await mobile.page.setViewportSize({width:390,height:844});assert(await mobile.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await mobile.page.screenshot({path:process.env.ACENET_SCREENSHOT||'/tmp/acenet-connection-inline.png'});assert.deepEqual(mobile.errors,[]);await mobile.context.close();
- console.log('PASS same-tab sign-in with real routing: draft/files/chat restored, auto-send once, automatic free model, settings without send, Back/decline/expiry, start failure, connected users, no popups/stacked dialogs, mobile. Provider network and account login are fixtures.');
+ console.log('PASS same-tab sign-in with real routing: code-only callbacks with/without tab marker, connection reuse across reload/follow-up/new chat, stale status recovery, draft/files/chat restored, auto-send once, automatic free model, settings without send, Back/decline/expiry, start failure, connected users, no popups/stacked dialogs, mobile. Provider network and account login are fixtures.');
 }finally{globalThis.fetch=nativeFetch;await browser.close();}

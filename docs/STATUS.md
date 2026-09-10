@@ -1,10 +1,12 @@
-# Current status — 9 September 2026
+# Current status — 10 September 2026
 
 Live site: https://ace-acenet.pages.dev
 Public source: https://github.com/hamzadianathbiz/acenet
-Pages release: c928cf29. Worker: 346d6e72-6c00-4970-adbf-4ab756a7f696.
+Pages release: c78d123a. Worker: 076fc17a-ea06-474b-87d2-3efb251cd1f3.
 
-The popup flow is replaced by same-tab **Connect & send**. A private bounded draft restores prompt/files/chat after OAuth; success sends once, while Back/decline/expiry restores without sending. No executor modal or callback account-panel opening. 45 Node tests and browser integration with actual route code pass locally and on deployed assets. The real OpenRouter sign-in page opens; completing user authorization and inference remain pending.
+Successful OpenRouter connections are reused across messages, new chats and page reloads. The callback accepts a code-only return, recovering the pending state from the authenticated workspace if tab storage was lost. A stale browser status cannot restart OAuth when the server already holds a connection. Repeating the same successful callback reuses the saved key without exchanging the code again.
+
+47 focused Node tests and actual-route browser integration pass locally and on deployed assets, including code-only callbacks and multiple sends after a single connection. The existing same-tab private draft restoration remains. Live asset hashes and authenticated recovery were verified. Provider login/exchange in browser tests is simulated; actual user authorization and open-model inference remain unverified.
 
 ## Current workflow
 One chat composer, accepted replies and follow-up context. Work details and cost are collapsed. New chat starts a separate conversation; cross-chat memory is deferred.
@@ -22,9 +24,9 @@ Connect OpenRouter once for automatic selection of an available zero-priced mode
 - Large evidence extraction into bounded sections with coverage manifests and explicit derived-note provenance.
 
 ## Validation and limits
-121 focused automated checks pass: 36 harness, 43 connector and 42 Node tests. The canonical deployed chat passed browser tests with isolated API fixtures, including follow-ups, Enter to send, New chat, pending permissions and Stop. Deployed HTML, JS, CSS, both helper ZIPs and installers match the local release byte for byte.
+The orchestration release passed 36 harness and 43 connector tests; these unchanged Python paths were not rerun for the connection-only fix. The current 47 Node checks pass. The canonical deployed chat passed browser tests with isolated API fixtures, including follow-ups, Enter to send, New chat, pending permissions and Stop. Deployed HTML, JS, CSS, both helper ZIPs and installers match the local release byte for byte.
 
-Actual v3 Astra-to-open-model inference remains unverified: the accessible owner account has no executor connected. There is no measured v3 quality/cost parity or 90% savings result. The prior 36.77% result belongs to the superseded v2 workflow.
+Actual v3 Astra-to-open-model inference remains unverified: the accessible owner account had no executor connected when checked on 9 September. There is no measured v3 quality/cost parity or 90% savings result. The prior 36.77% result belongs to the superseded v2 workflow.
 
 Large evidence is bounded to 48 sections of 24 KB; Astra reviews derived notes for larger inputs, not every raw byte independently. Exhaustive folder ingestion, provider pagination recovery, resumable caches, OCR, arbitrary code execution and external writes are not implemented. Prior full-book coverage failed review. Chat history is bounded by request limits and may require a new chat when full.
 

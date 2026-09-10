@@ -165,3 +165,10 @@ Worker 7ab077ce-36f1-40b7-bc50-b82f6679285a and Pages ae02e441 live. 42 Node tes
 User screenshots showed the popup and account panel still producing overlapping setup surfaces. Removed the executor dialog and separate-window OAuth. The composer now offers Connect & send, saves a bounded private tenant draft, navigates to OpenRouter in the same tab, restores prompt/files/chat and sends once on successful authorization. Back/decline/expiry preserve the draft without sending. Settings-only connections return without sending. Only a flow ID stays in tab storage; source content is excluded from OAuth URLs.
 
 Pages c928cf29 and Worker 346d6e72-6c00-4970-adbf-4ab756a7f696 live. 45 Node tests and actual-route browser integration pass on local/canonical assets. Real OpenRouter authorization page opens. Asset hashes and authenticated nonmatching-flow restore verified; no user login or inference performed.
+
+
+## [2026-09-10] fix | Reuse the OpenRouter connection across messages
+
+Fixed code-only OAuth callbacks being ignored. Recover state from the authenticated workspace when the tab marker is unavailable; reuse a saved connection when UI status is stale; make successful callback retries idempotent. Block sends during connection completion and reset the disabled Send button on New chat. Private drafts and once-only auto-send remain.
+
+Pages c78d123a and Worker 076fc17a-ea06-474b-87d2-3efb251cd1f3 deployed. 47 Node tests and local/canonical browser integration pass, including one connection followed by reload, follow-up and new-chat sends. Live asset hashes and authenticated recovery checked. Real third-party login and inference were not performed. No helper update required.
